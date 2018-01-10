@@ -129,20 +129,18 @@ def _add_loss_summaries(total_loss):
 
 
 def train(total_loss, global_step):
-    num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
-    decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
-
-    lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
-                                    global_step,
-                                    decay_steps,
-                                    LEARNING_RATE_DECAY_FACTOR,
-                                    staircase=True)
-    tf.summary.scalar('learning_rate', lr)
 
     loss_averages_op = _add_loss_summaries(total_loss)
 
     with tf.control_dependencies([loss_averages_op]):
-        opt = tf.train.GradientDescentOptimizer(lr)
+        opt = tf.train.AdamOptimizer(
+                                    learning_rate=0.001,
+                                    beta1=0.9,
+                                    beta2=0.999,
+                                    epsilon=1e-08,
+                                    use_locking=False,
+                                    name='Adam'
+                                )                               
         grads = opt.compute_gradients(total_loss)
 
     apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
