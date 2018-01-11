@@ -1,0 +1,129 @@
+\documentclass[11pt]{article}
+\renewcommand{\baselinestretch}{1.05}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum}
+
+\usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd}
+\usepackage{graphicx, wrapfig}
+\usepackage{float}
+\usepackage{caption, subcaption}
+\usepackage{tkz-fct}
+\usetikzlibrary{babel}
+\usepackage{pgfplots}
+\usepackage{enumitem}
+\usepackage{multicol, vwcol}
+\usepackage{listingsutf8}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{booktabs}
+
+
+\usepackage[sorting=none]{biblatex}
+\bibliography{bibliography.bib}
+
+\hypersetup{
+    bookmarks=true,         % show bookmarks bar?
+    unicode=false,          % non-Latin characters in Acrobat’s bookmarks
+    pdftoolbar=true,        % show Acrobat’s toolbar?
+    pdfmenubar=true,        % show Acrobat’s menu?
+    pdffitwindow=false,     % window fit to page when opened
+    pdfstartview={FitH},    % fits the width of the page to the window
+    pdftitle={Inteligencia de Negocio - Práctica 3},    % title
+    pdfauthor={Francisco Luque},     % author
+    pdfsubject={Inteligencia de Negocio},   % subject of the document
+    pdfnewwindow=true,      % links in new PDF window
+    colorlinks=true,        % false: boxed links; true: colored links
+    linkcolor=gray,          % color of internal links (change box color with linkbordercolor)
+    citecolor=cyan,         % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=blue           % color of external links
+}
+
+\setlength{\parindent}{0pt}
+\topmargin0.0cm
+\headheight0.0cm
+\headsep0.0cm
+\oddsidemargin0.0cm
+\textheight23.0cm
+\textwidth16.5cm
+\footskip1.0cm
+\theoremstyle{plain}
+
+\newtheorem{theorem}{Teorema}
+\newtheorem{corollary}{Corolario}
+\newtheorem{lemma}{Lema}
+\newtheorem{proposition}{Proposición}
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}
+\newtheorem{example}{Ejemplo}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\title{Inteligencia de Negocio - Práctica 3\\
+  DGIIM \\
+  \large Problema de regresión - Competición en Kaggle}
+\author{Francisco Luque Sánchez \\
+  Universidad de Granada \\
+  fluque1995@correo.ugr.es}
+
+\begin{titlepage}
+  \centering
+  {\scshape\LARGE Universidad de Granada \par}
+  \vspace{1cm}
+  {\scshape\Large Visión por computación \par}
+  \vspace{1.5cm}
+  {\huge\bfseries Clasificación de imágenes usando CNNs \par}
+  \vspace{2cm}
+  {\Large\itshape Francisco Luque Sánchez \\
+    María del Mar Ruiz Martín\par}
+  \vspace{2cm}
+  \includegraphics[width=.3\textwidth]{logougr.png}\par\vspace{1cm}
+  % Bottom of the page
+  {\large \today\par}
+\end{titlepage}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Introducción}
+
+En esta práctica se tratará el problema de la clasificación de objetos
+en imágenes, utilizando concretamente redes neuronales convolucionales
+(\textit{CNNs}). El problema que se abordará consiste en tratar de
+distinguir perros de gatos utilizando estos modelos. Se comenzará con
+un modelo simple, el cual se irá modificando para tratar de mejorar su
+capacidad para clasificar.
+
+\subsection{Conjunto de datos utilizado}
+
+El conjunto de datos utilizado se ha generado utilizando las bases de
+datos mostradas en \cite{db1, db2, db3}. Se han extraído todas las
+imágenes de las mismas y etiquetado en dos clases (perros y gatos),
+obteniéndose un conjunto total de unos 13000 gatos y 25000
+perros. Dicho conjunto se ha dividido en dos subconjuntos, un conjunto
+de entrenamiento (unos 25500 ejemplos) y uno de test (en torno a 12500
+ejemplos), tratando de mantener la proporción de perros y gatos lo más
+parecida posible en ambos conjuntos.
+
+\subsection{Aspectos de implementación}
+
+Todo el código se ha desarrollado utilizando el \textit{framework}
+TensorFlow \cite{tf}, que es una librería de código abierto
+desarrollada por Google, orientada a la implementación de soluciones
+utilizando inteligencia artificial. El primer modelo desarrollado, en
+particular, se ha hecho utilizando un tutorial de la documentación
+del \textit{framework}, que se puede consultar en \cite{cnn-tutorial}.
+
+\printbibliography
+
+\end{document}
