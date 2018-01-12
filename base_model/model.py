@@ -1,9 +1,7 @@
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import re
 import tensorflow as tf
 
 import input
@@ -13,23 +11,12 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_string('data_dir', '../images/',
-                           """Path to images directory.""")
-tf.app.flags.DEFINE_boolean('use_fp16', False,
-                            """Train the model using fp16.""")
+                           """Path to the CIFAR-10 data directory.""")
 
 IMAGE_SIZE = input.IMAGE_SIZE
 NUM_CLASSES = input.NUM_CLASSES
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
-
-
-MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
-NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
-LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
-INITIAL_LEARNING_RATE = 0.1       # Initial learning rate.
-
-
-TOWER_NAME = 'tower'
 
 
 def _variable_on_cpu(name, shape, initializer):
@@ -40,17 +27,6 @@ def _variable_on_cpu(name, shape, initializer):
           initializer=initializer,
           dtype=tf.float32
         )
-    return var
-
-
-def _variable_with_weight_decay(name, shape, stddev, wd):
-    var = _variable_on_cpu(
-      name,
-      shape,
-      tf.truncated_normal_initializer(stddev=stddev, dtype=tf.float32))
-    if wd is not None:
-        weight_decay = tf.multiply(tf.nn.l2_loss(var), wd, name='weight_loss')
-        tf.add_to_collection('losses', weight_decay)
     return var
 
 
@@ -68,10 +44,14 @@ def inputs(eval_data):
 def inference(images):
     # conv
     with tf.variable_scope('conv') as scope:
-        kernel = _variable_with_weight_decay('weights',
-                                             shape=[5, 5, 3, 64],
-                                             stddev=5e-2,
-                                             wd=0.0)
+        kernel = _variable_on_cpu(
+            'weights',
+            shape=[5, 5, 3, 64],
+            initializer=tf.truncated_normal_initializer(
+                stddev=0.1,
+                dtype=tf.float32
+            )
+        )
         conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
         biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         pre_activation = tf.nn.bias_add(conv, biases)
@@ -81,23 +61,35 @@ def inference(images):
     pool1 = tf.nn.max_pool(conv1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
                            padding='SAME', name='pool')
 
-
     # dense
     with tf.variable_scope('dense') as scope:
         reshape = tf.reshape(pool1, [FLAGS.batch_size, -1])
         dim = reshape.get_shape()[1].value
-        weights = _variable_with_weight_decay('weights', shape=[dim, 384],
-                                              stddev=0.04, wd=0.004)
+        weights = _variable_on_cpu(
+            'weights',
+            shape=[dim, 384],
+            initializer=tf.truncated_normal_initializer(
+                stddev=0.04,
+                dtype=tf.float32
+            )
+        )
+
         biases = _variable_on_cpu('biases', [384],
                                   tf.constant_initializer(0.1))
         local = tf.nn.relu(
             tf.matmul(reshape, weights) + biases, name=scope.name
         )
 
-
     with tf.variable_scope('softmax_linear') as scope:
-        weights = _variable_with_weight_decay('weights', [384, NUM_CLASSES],
-                                              stddev=1/192.0, wd=0.0)
+        weights = _variable_on_cpu(
+            'weights',
+            shape=[384, NUM_CLASSES],
+            initializer=tf.truncated_normal_initializer(
+                stddev=1/192.0,
+                dtype=tf.float32
+            )
+        )
+
         biases = _variable_on_cpu('biases', [NUM_CLASSES],
                                   tf.constant_initializer(0.0))
         softmax_linear = tf.add(tf.matmul(local, weights), biases,
@@ -129,29 +121,15 @@ def _add_loss_summaries(total_loss):
 
 
 def train(total_loss, global_step):
-    num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
-    decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
-
-    lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
-                                    global_step,
-                                    decay_steps,
-                                    LEARNING_RATE_DECAY_FACTOR,
-                                    staircase=True)
-    tf.summary.scalar('learning_rate', lr)
-
     loss_averages_op = _add_loss_summaries(total_loss)
 
     with tf.control_dependencies([loss_averages_op]):
-        opt = tf.train.GradientDescentOptimizer(lr)
+        opt = tf.train.GradientDescentOptimizer(0.001)
         grads = opt.compute_gradients(total_loss)
 
     apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
 
-    variable_averages = tf.train.ExponentialMovingAverage(
-            MOVING_AVERAGE_DECAY, global_step)
-    variables_averages_op = variable_averages.apply(tf.trainable_variables())
-
-    with tf.control_dependencies([apply_gradient_op, variables_averages_op]):
+    with tf.control_dependencies([apply_gradient_op]):
         train_op = tf.no_op(name='train')
 
     return train_op
