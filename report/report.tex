@@ -179,12 +179,47 @@ capas es la función \textit{Relu}. El esquema de la misma es el siguiente:
   \caption{Esquema del modelo simple de red neuronal convolucional}
 \end{figure}
 
-\subsection{Aprendizaje de la red}
+\subsubsection{Aprendizaje de la red}
 
 Una vez definida la estructura de la red, vamos a explicar ligeramente
-el funcionamiento del aprendizaje de la misma. En cada etapa del aprendizaje,
-se genera aleatoriamente del conjunto de imágenes de entrenamiento un subconjunto
-de 128 ejemplos. 
+el funcionamiento del aprendizaje de la misma. En cada etapa del
+aprendizaje, se genera aleatoriamente del conjunto de imágenes de
+entrenamiento un subconjunto de 128 ejemplos. La red neuronal
+clasifica dichas imágenes, otorgando una probabilidad a cada una de
+ellas de que pertenezca a una clase o a la otra.  Una vez hecha la
+clasificación, se calcula el error cometido como la media de los
+errores cometidos. El error cometido es la diferencia entre la
+probabilidad estimada para cada clase y la clase real de la imagen.
+Una vez calculado dicho error, se propaga con un gradiente descendente
+para modificar los pesos de todas las capas. La tasa de aprendizaje es
+constante durante todo el entrenamiento, con un valor de $0.001$.
+Se realizan 10000 pasos de aprendizaje.
+
+\subsubsection{Evaluación del aprendizaje durante el entrenamiento}
+
+Para ir viendo cómo evoluciona el aprendizaje de la red durante el
+entrenamiento, se ejecuta simultáneamente un test sobre la red
+neuronal. Este test coge un conjunto aleatorio de 10000 imágenes
+del conjunto de test y lo clasifica utilizando la red neuronal.
+Una vez clasificadas las mismas (se obtiene la probabilidad de que
+cada una de las imágenes pertenezca a una de las dos clases, y se
+devuelve como clase la que tenga una probabilidad mayor), se hace
+el cociente entre el total de ejemplos bien clasificados y el número
+de ejemplos totales, obteniéndose así el tanto por uno de instancias
+bien clasificadas.
+
+\subsubsection{Gráficas de resumen del aprendizaje}
+
+Utilizando una de las utilidades de \textit{TensorFlow}, llamada
+TensorBoard, se han creado varios gráficos que permiten ver cómo
+evoluciona la capacidad de predicción de la red en función al número
+de iteraciones de aprendizaje que ha realizado la misma.\\
+
+Nos centraremos principalmente en dos gráficas. Una que muestra la
+evolución de la función de pérdida, la cual tratamos de minimizar,
+y otra que muestra la capacidad de predicción sobre el conjunto de
+test.
+
 \printbibliography
 
 \end{document}
