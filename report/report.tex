@@ -193,7 +193,7 @@ probabilidad estimada para cada clase y la clase real de la imagen.
 Una vez calculado dicho error, se propaga con un gradiente descendente
 para modificar los pesos de todas las capas. La tasa de aprendizaje es
 constante durante todo el entrenamiento, con un valor de $0.001$.
-Se realizan 10000 pasos de aprendizaje.
+Se realizan 8000 pasos de aprendizaje.
 
 \subsubsection{Evaluación del aprendizaje durante el entrenamiento}
 
@@ -211,14 +211,129 @@ bien clasificadas.
 \subsubsection{Gráficas de resumen del aprendizaje}
 
 Utilizando una de las utilidades de \textit{TensorFlow}, llamada
-TensorBoard, se han creado varios gráficos que permiten ver cómo
-evoluciona la capacidad de predicción de la red en función al número
+\textit{TensorBoard}, se han creado varios gráficos que permiten ver
+cómo evoluciona la capacidad de predicción de la red en función al
+número
 de iteraciones de aprendizaje que ha realizado la misma.\\
 
 Nos centraremos principalmente en dos gráficas. Una que muestra la
-evolución de la función de pérdida, la cual tratamos de minimizar,
-y otra que muestra la capacidad de predicción sobre el conjunto de
-test.
+evolución de la función de pérdida, la cual tratamos de minimizar, y
+otra que muestra la capacidad de predicción sobre el conjunto de test.
+
+Estas dos gráficas van a ser nuestra principal forma de obtener
+información sobre la evolución del aprendizaje de la red nueronal. Una
+de las ventajas que ofrece TensorFlow es que permite al programador
+establecer, de forma muy simplificada (tiene implementado un sistema
+de clases para realizar todo el trabajo), qué variables se quieren
+supervisar durante el entrenamiento. De esta manera, podemos colocar
+supervisores que mantengan un historial de los pesos de las distintas
+capas de la red, de si ciertas neuronas se activan o se inhiben para
+una determinada foto, cómo se propagan los gradientes por la red
+neuronal con el algoritmo de \textit{backpropagation}... y mostrar
+toda esta información a posteriori con una interfaz web (es esta
+interfaz la que se conoce como \textit{TensorBoard}. No obstante, en
+este trabajo no se mostrará la capacidad completa de esta herramienta,
+ya que su configuración es tediosa, y aunque no ralentiza en exceso el
+sistema, sí que se puede apreciar cierta pérdida de
+rendimiento. Además, la interpretación de estos gráficos, a pesar de
+que se muestran de forma bastante clara, no es nada sencilla, y
+requieren de un conocimiento previo sobre redes neuronales bastante
+profundo. Creemos por tanto que la extracción e interpretación de
+dichas gráficas queda fuera de las competencias que intenta cubrir el
+trabajo, y por esto mostramos sólo las gráficas cuya interpretación
+aporta información realmente relevante sobre el aprendizaje de la
+misma.\\
+
+Pasamos entonces a ver la gráfica de la evolución de la función de
+pérdida en los distintos pasos de entrenamiento:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_base}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Podemos observar cómo la función de pérdida tiene un comportamiento un
+poco caótico en este caso, aunque sí que se observa cierta tendencia
+al decrecimiento. Se comienza con un valor cercano a 0.7, el cual se
+consigue decrementar hasta 0.43 en la iteración 7700. No obstante, se
+ve que el comportamiento no es del todo bueno, ya que se dan muchos
+pasos hacia atrás durante el entrenamiento. Pasamos ahora a ver el
+comportamiento de la gráfica que muestra la evolución la precisión del
+modelo:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_base}
+  \caption{Evolución de la precisión de la red neuronal}
+\end{figure}
+
+Se puede observar una clara tendencia a la mejora durante todo el
+proceso de aprendizaje, aunque no se una mejora muy significativa. El
+sistema comienza con una capacidad de predicción de en torno al 67 \%
+de efectividad, y consigue mejorar dicha capacidad de predicción hasta
+alcanzar una precisión de algo más del 73 \%. No obstante, estos
+resultados no son del todo satisfactorios, ya que hemos construido un
+modelo muy básico y todavía clasificamos mal algo más de un cuarto
+de las instancias que tenemos. En el resto de la práctica se irán
+proponiendo mejoras a este modelo básico, que tratarán de mejorar
+su capacidad de predicción. La primera de las modificaciones consistirá
+simplemente en introducir un \textit{Weight Decay} simple sobre los
+pesos de la red neuronal. Pasamos a describirlo y ver los resultados
+en la siguiente sección.
+
+\subsection{Primera mejora: \textit{Weight Decay} (wd\_model)}
+
+Como ya hemos dicho al final de la sección anterior, la primera
+modificación que vamos a introducir es lo que se conoce como
+\textit{Weight Decay}, o disminución de pesos. Esta modificación
+consiste en añadir una penalización a los pesos de la red en la
+función de pérdida. Concretamente, se añade un término por cada capa
+de la red en las que se aplica, correspondiente a la norma $L_2$ del
+vector de pesos, multiplicado por un parámetro a configurar por el
+usuario. Esto hace que cada vez que se propaga el error, además de
+modificar los pesos en función de la capacidad de predicción, se
+reduce la norma del vector, haciendo que los pesos no aumenten
+indefinidamente. Veremos que esta modificación nos servirá para que
+la red tenga un comportamiento mucho mejor que en el modelo anterior.\\
+
+En cuanto a la estructura de la red y el esquema de aprendizaje de la
+misma, no comentaremos nada más, ya que es exactamente la misma que la
+que teníamos para el ejemplo anterior. De nuevo tendremos una capa de
+convolución, una capa de reducción de tamaño, una de alisamiento de la
+dimensión de las imágenes para convertirlas en vectores, una capa
+completamente conectada y la salida con dos neuronas. La única
+modificación interesante es que los pesos de todas las capas llevan
+asociado el \textit{Weight Decay}, lo que se verá claramente en los
+valores de la función de pérdida, que tomará valores mucho mayores
+(recordemos que en el ejemplo anterior, el valor de la función no
+sobrepasaba el valor 1, mientras que ahora comenzará en un valor
+cercano a 600). El esquema de aprendizaje es el mismo nuevamente,
+utilizándose un esquema de gradiente descendente
+con una tasa de aprendizaje constante para propagar el error.\\
+
+Lo que si tendremos ahora es un aprendizaje mucho más largo.
+Mostraremos dos ejecuciones distintas. La primera es una ejecución en
+la que se realizan 10000 etapas de aprendizaje. Tras la ejecución, se
+observó que, aunque se había mejorado el resultado de la ejecución
+básica, la red neuronal no había presentado todavía un estancamiento
+en los resultados, por lo que se decide modificar este parámetro, y
+establecer el límite de etapas de aprendizaje en 100000. Esta
+estimación es muy exagerada, ya que probablemente se produzca antes un
+estancamiento, pero como las ejecuciones son costosas, se decide poner
+un número desproporcionado de pasos, para cortar el proceso cuando se
+observe un estancamiento en la disminución de la función de pérdida.
+Más adelante en la práctica se introducirá un método que permita
+automatizar el momento del entrenamiento en el que se corta el
+aprendizaje. Esto es lo que se llama \textit{Early Stopping}, y
+básicamente se basa en hacer que se pare el entrenamiento cuando
+se produce un estancamiento en la mejora de la función de pérdida,
+esto es, cuando tras un número significativo de iteraciones no se
+consigue disminuir el valor de la misma lo suficiente, o no llega
+a mejorarse.\\
+
+Pasamos a ver los resultados de las ejecuciones de entrenamiento
+conseguidos por esta red neuronal.
+
+\subsubsection{Gráficas de resumen del aprendizaje}
 
 \printbibliography
 
