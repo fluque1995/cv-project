@@ -335,6 +335,70 @@ conseguidos por esta red neuronal.
 
 \subsubsection{Gráficas de resumen del aprendizaje}
 
+Vamos a ver, como hemos dicho antes, las gráficas de dos ejecuciones
+del aprendizaje para este modelo. La primera que se muestra es una
+primera ejecución, en la que se establecieron 10000 pasos de
+aprendizaje.  Tras ver que al finalizar la ejecución la red neuronal
+no se había estancado, se realiza otra ejecución de 100000 pasos para
+ver hasta qué punto la red neuronal es capaz de mejorar las
+predicciones.  La primera gráfica es la siguiente:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_wd_1}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Claramente, la función de pérdida no se ha estabilizado. Si observamos
+la gráfica de la capacidad de predicción, tenemos que:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_wd_1}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+Donde hemos conseguido un porcentaje de acierto cercano al 78 \%. No
+obstante, se ve claramente en ambas gráficas que el resultado es
+claramente mejorable. En la segunda ejecución, la gráfica de la
+función de pérdida es la siguiente:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_wd_2}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Como se puede ver en la gráfica, ahora se han ejecutado 20000 pasos de
+aprendizaje. A pesar de ello, todavía no se ha estabilizado la función
+de pérdida, pero como observaremos en la gráfica siguiente sí que se
+ha estabilizado la capacidad de predicción en la red:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_wd_2}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Podemos ver en la gráfica que en los últimos 5000 pasos apenas se ha
+conseguido mejorar el porcentaje de clasificación del modelo. No
+obstante, con esta red hemos conseguido mejorar la capacidad de
+aprendizaje de la misma, subiendo el porcentaje de acierto en
+clasificación de un 73\% a un $86.5\%$. Esta mejora ha supuesto, si
+tenemos en cuenta el error (27\% frente a $13.5\%$), conseguir
+clasificar correctamente, en media, la mitad de los ejemplos que antes
+no éramos capaces de clasificar. Supone por tanto una mejora muy
+importante en el modelo. Además, hemos conseguido ganar mucha
+estabilidad a la hora de la mejora del modelo, ya que como hemos
+podido observar, la función de pérdida ha ido decrementando su valor
+en todo momento, al contrario de lo que ocurría en el primer modelo,
+en el que teníamos oscilaciones muy fuertes. Gran parte de la culpa de
+este fenómeno es de los términos que hemos añadido, ya que el tener en
+cuenta como penalización la norma de los pesos de la red, y
+decrementarlos todos en cada paso de aprendizaje en función de su
+norma, es normal que la función de pérdida no tienda a aumentar, ya que
+la parte correspondiente a los pesos será mucho más significativa que
+la correspondiente a la mala clasificación. No obstante, es innegable
+que la implementación de \textit{Weight Decay} ha conseguido mejorar
+enormemente los resultados obtenidos por la red, a la vista de los
+resultados obtenidos.\\
+
 \printbibliography
 
 \end{document}

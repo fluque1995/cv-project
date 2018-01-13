@@ -2,7 +2,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
-filename = "accuracy_base.csv"
+filename = "accuracy_wd_long.csv"
 
 data = pd.read_csv(filename)
 
