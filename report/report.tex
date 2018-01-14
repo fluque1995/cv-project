@@ -526,11 +526,53 @@ lleguen a estas situaciones.
 
 \subsection{modificacion ADABOOST: esquema de aprendizaje mediante adamOptimizer (3adam\_model)}
 
+A lo largo de toda la práctica hemos trabajado con el mismo esquema de 
+aprendizaje: \textit{Gradient Boosting}. En este apartado trataremos con
+uno diferente, \textit{AdamOptimizer}. \textit{AdamOptimizer} consiste en
+un método estocástico para determinar los pesos de nuestra red neuronal.
+La principal ventaja frente al gradiente descendente, es que este se 
+encargará de modificar la tasa de aprendizaje en función de la media
+y el segundo momento de los gradientes, suponiendo así una mejor 
+aproximación.\\
+
+Aunque generalmente arroja mejores resultados que el gradiente descendente,
+en general necesita de redes neuronales con topologías más complejas.
+Trataremos en esta ocasión con una red neuronal de 3 capas de convolución
+y pooling, ya que contamos con restricciones hardware. En la sección
+siguiente definimos en mayor profundidad la arquitectura elegida.
+
+\subsubsection{Estructura de la red}
+
+Como ya se ha comentado, en esta ocasión contaremos con 3 capas de 
+convolución y pool, manteniéndo igual el resto de la estructura que 
+presentabamos en el primer modelo. La primera capa de convolución recibirá
+un batch de 128 imágenes de tamaño $64 \times 64 \times 3$ y extraerá un 
+total de 64 filtros para cada una de las imágenes. Seguido de esto tendremos
+una capa de pool que reduzca el tamaño de las imágenes a la mitad, 
+produciendo así una salida de tamaño $128 \times 32 \times 32 \times 64$.
+A continuación contaremos con una capa de convolución y una capa de pool
+igual a las anteriores. Por tanto, en este punto contaremos con un conjunto
+de imágenes de tamaño $128 \times 16 \times 16 \times 64$. Finalmente, se
+tiene una capa de convolución que extraerá 128 filtros para cada foto, 
+seguida de una capa de pool que de nuevo reducirá el tamaño de las imágenes
+a la mitad, quedándonos así un conjunto de tamaño $128 \times 8 \times 
+8 \times 128$. Esta salida será tomada como entrada para una capa de
+redimensión, que nos producirá una salida de $128 \times 8192$. El resto
+es idéntico al expuesto en el modelo básico.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{imgs/adam_model.png}  
+  \caption{Esquema del modelo de red neuronal convolucional}
+\end{figure}
+
 
 
 
 \subsubsection{Gráficas de resumen del aprendizaje}
 
+Una vez explicado 
 
 
 \printbibliography
