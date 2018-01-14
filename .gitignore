@@ -5,6 +5,7 @@ model_test/
 model_eval/
 model_train_no_wd/
 model_eval_no_wd/
+model_eval_good/
 auto/
 *~
 *.aux

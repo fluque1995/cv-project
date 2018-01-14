@@ -19,7 +19,7 @@ tf.app.flags.DEFINE_string('eval_data', 'test',
                            """Either 'test' or 'train_eval'.""")
 tf.app.flags.DEFINE_string('checkpoint_dir', './model_train',
                            """Directory where to read model checkpoints.""")
-tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 0.5,
+tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 1,
                             """How often to run the eval.""")
 tf.app.flags.DEFINE_integer('num_examples', 10000,
                             """Number of examples to run.""")
@@ -74,7 +74,7 @@ def evaluate():
             print("Everything OK. Testing...")
         images, labels = model.inputs(eval_data=eval_data)
 
-        logits = model.inference(images)
+        logits = model.inference(images, is_training=False)
 
         top_k_op = tf.nn.in_top_k(logits, labels, 1)
 

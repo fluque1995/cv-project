@@ -218,10 +218,10 @@ de iteraciones de aprendizaje que ha realizado la misma.\\
 
 Nos centraremos principalmente en dos gráficas. Una que muestra la
 evolución de la función de pérdida, la cual tratamos de minimizar, y
-otra que muestra la capacidad de predicción sobre el conjunto de test.
+otra que muestra la capacidad de predicción sobre el conjunto de test.\\
 
 Estas dos gráficas van a ser nuestra principal forma de obtener
-información sobre la evolución del aprendizaje de la red nueronal. Una
+información sobre la evolución del aprendizaje de la red neuronal. Una
 de las ventajas que ofrece TensorFlow es que permite al programador
 establecer, de forma muy simplificada (tiene implementado un sistema
 de clases para realizar todo el trabajo), qué variables se quieren
@@ -231,7 +231,7 @@ capas de la red, de si ciertas neuronas se activan o se inhiben para
 una determinada foto, cómo se propagan los gradientes por la red
 neuronal con el algoritmo de \textit{backpropagation}... y mostrar
 toda esta información a posteriori con una interfaz web (es esta
-interfaz la que se conoce como \textit{TensorBoard}. No obstante, en
+interfaz la que se conoce como \textit{TensorBoard}). No obstante, en
 este trabajo no se mostrará la capacidad completa de esta herramienta,
 ya que su configuración es tediosa, y aunque no ralentiza en exceso el
 sistema, sí que se puede apreciar cierta pérdida de
@@ -310,7 +310,7 @@ cercano a 600). El esquema de aprendizaje es el mismo nuevamente,
 utilizándose un esquema de gradiente descendente
 con una tasa de aprendizaje constante para propagar el error.\\
 
-Lo que si tendremos ahora es un aprendizaje mucho más largo.
+Lo que sí tendremos ahora es un aprendizaje mucho más largo.
 Mostraremos dos ejecuciones distintas. La primera es una ejecución en
 la que se realizan 10000 etapas de aprendizaje. Tras la ejecución, se
 observó que, aunque se había mejorado el resultado de la ejecución
@@ -373,7 +373,7 @@ ha estabilizado la capacidad de predicción en la red:
 
 \begin{figure}[H]
   \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_wd_2}
-  \caption{Evolución de la función de pérdida}
+  \caption{Evolución de la capacidad de predicción}
 \end{figure}
 
 Podemos ver en la gráfica que en los últimos 5000 pasos apenas se ha
@@ -398,6 +398,127 @@ la correspondiente a la mala clasificación. No obstante, es innegable
 que la implementación de \textit{Weight Decay} ha conseguido mejorar
 enormemente los resultados obtenidos por la red, a la vista de los
 resultados obtenidos.\\
+
+
+\subsection{Segunda mejora: \textit{Variable Learning Rate} (vlr\_wd\_model)}
+
+En vista de la mejora que nos supone el modelo anterior, trabajaremos
+sobre éste y le añadiremos sucesivas modificaciones con fin de estudiar
+la influencia de cada una en nuestro modelo. Hasta ahora habíamos 
+trabajado con una tasa de aprendizaje fija. Este parámetro resulta 
+difícil de ajustar, puesto que tenemos que encontrar un equilibrio
+entre la capacidad de explorar el espacio de soluciones que nos 
+proporciona un valor de tasa de aprendizaje alto, y la capacidad de 
+exploración que conseguiríamos con una valor bajo para la tasa.\\
+
+Para solventar esta dificultadad de ajustar el parámetro, y conseguir
+una mayor flexibilidad entre la explotación y la exploración del espacio
+de soluciones, utilizaremos una tasa de aprendizaje variable. De esta 
+forma se comienza con un valor de tasa de aprendizaje relativamente alto,
+que nos permita realizar al inicio un buen proceso de exploración, 
+mientras este parámetro se reduce gradualmente, dando así paulatinamente
+más importancia al proceso de explotación.\\
+
+Como ya se ha comentado, se utiliza la misma topología para nuestra
+red neuronal que la que tenía el modelo anterior, utilizando también 
+el mismo esquema de aprendizaje con gradiente descendente, pero en esta
+ocasión con tasa de aprendizaje variable.\\
+
+A continuación vamos a estudiar los resultados obtenidos en la ejecución
+del nuevo modelo.
+
+
+
+\subsubsection{Gráficas de resumen del aprendizaje}
+
+De forma análoga a como se ha procedido hasta ahora, mostraremos las 
+gráficas sobre la función de pérdida y la capacidad de predicción 
+del modelo a lo largo de su fase de entrenamiento. En primer lugar
+mostramos la función de pérdida:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_vlr_wd}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+
+Encontramos por un lado que la disminución de la función de oérdida es 
+mucho más rápida que la que obteníamos en el modelo anterior, bajando 
+muy rápidamente a valores inferiores a 10 y llegando por debajo de la 
+unidad, cuando el modelo anterior no era capaz obtener valores por debajo
+de 100. Veamos a continuación como evoluciona la capacidad de predicción
+del modelo actual.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_vlr_wd}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+En esta ocasión encontramos que aumenta muy rápidamente, pero pronto se
+estanca, no consiguiendo alcanzar una precisión superior al 76\%. En vista
+de las dos gráficas anteriores, y del comportamiento que obteníamos en el
+modelo anterior, podemos deducir que nuestro modelo se centra demasiado
+en reducir el valor de pérdida provocado por la penalización aplicada por
+el \textit{Weight Decay} en lugar de mejorar la solución a nuestro 
+problema. 
+
+
+
+
+
+\subsection{Tercera mejora: \textit{Variable Learning Rate} (vlr\_model)}
+
+Una vez estudiado el modelo anterior, nos cabe preguntarnos si el uso de
+una tasa de aprendizaje variable nos puede ayudar en aquellos casos en los
+que no apliquemos \textit{Weight Decay}, o lo apliquemos en una menor medida.\\
+
+Con el fin de comprobar esta idea, creamos un nuevo modelo idéntico al 
+anterior con la salvedad de que tan solo aplicaremos \textit{Weight Decay} en 
+la capa densa. Nuestro propósito es comprobar que al no haber tanta 
+penalización en la función de pérdida, nuestra red neuronal convolucional 
+podrá realizar una mejor clasificación.\\
+
+Pasámos a comprobar los resultados obtenidos por el tercer modelo:
+
+\subsubsection{Gráficas de resumen del aprendizaje}
+
+De nuevo pasamos a mostrar en primer lugar la evolución de la función
+de pérdida, para a continuación estudiar la capacidad de predicción 
+que nos aporta el modelo.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_vlr}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+
+De nuevo encontramos que la función de pérdida, a pesar de comenzar con 
+valores relativamente altos, rápidamente decrece y alcanza valores muy 
+pequeños y se estabiliza. Sin embargo, encontramos que llega un punto 
+en el que toma un alto valor. A pesar de que tras el salto vuelve a 
+decrecer, lo hará de forma muy lenta y no llega a alcanzar los valores
+en los que se situaba antes. Veamos cómo se comporta en la predicción:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_vlr}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+En esta ocasión encontramos, a diferencia del modelo anterior, que tras
+una gran subida inicial, sigue creciendo, aunque de forma mucho más lenta.
+A pesar de comenzar con una tasa de predicción por debajo del 55\%, este
+modelo consigue alcanzar un 89\% de acierto, siendo notablemente mejor que
+todo lo que habíamos conseguido hasta ahora.\\
+
+Sin embargo, encontramos un rápido descenso coincidiendo con el punto en 
+el que la función de pérdida aumentaba. La capacidad de predicción del 
+modelo se reduce drásticamente estabilizándose en torno a un 66\%, valor 
+muy inferior. Esto nos hace plantearnos que debemos establecer un criterio
+de parada, para que la red neuronal finalice su entrenamiento y no se 
+lleguen a estas situaciones.
+
+
+
 
 \printbibliography
 
