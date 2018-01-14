@@ -272,15 +272,15 @@ sistema comienza con una capacidad de predicción de en torno al 67 \%
 de efectividad, y consigue mejorar dicha capacidad de predicción hasta
 alcanzar una precisión de algo más del 73 \%. No obstante, estos
 resultados no son del todo satisfactorios, ya que hemos construido un
-modelo muy básico y todavía clasificamos mal algo más de un cuarto
-de las instancias que tenemos. En el resto de la práctica se irán
-proponiendo mejoras a este modelo básico, que tratarán de mejorar
-su capacidad de predicción. La primera de las modificaciones consistirá
-simplemente en introducir un \textit{Weight Decay} simple sobre los
-pesos de la red neuronal. Pasamos a describirlo y ver los resultados
-en la siguiente sección.
+modelo muy básico y todavía clasificamos mal algo más de un cuarto de
+las instancias que tenemos. En el resto de la práctica se irán
+proponiendo mejoras a este modelo básico, que tratarán de mejorar su
+capacidad de predicción. La primera de las modificaciones consistirá
+simplemente en introducir un \textit{Weight Decay} sobre los pesos de
+la red neuronal. Pasamos a describirlo y ver los resultados en la
+siguiente sección.
 
-\subsection{Primera mejora: \textit{Weight Decay} (wd\_model)}
+\subsection{Primera modificación: \textit{Weight Decay} (wd\_model)}
 
 Como ya hemos dicho al final de la sección anterior, la primera
 modificación que vamos a introducir es lo que se conoce como
@@ -400,40 +400,41 @@ enormemente los resultados obtenidos por la red, a la vista de los
 resultados obtenidos.\\
 
 
-\subsection{Segunda mejora: \textit{Variable Learning Rate} (vlr\_wd\_model)}
+\subsection{Segunda modificación: \textit{Variable Learning Rate} (vlr\_wd\_model)}
 
 En vista de la mejora que nos supone el modelo anterior, trabajaremos
-sobre éste y le añadiremos sucesivas modificaciones con fin de estudiar
-la influencia de cada una en nuestro modelo. Hasta ahora habíamos 
-trabajado con una tasa de aprendizaje fija. Este parámetro resulta 
-difícil de ajustar, puesto que tenemos que encontrar un equilibrio
-entre la capacidad de explorar el espacio de soluciones que nos 
-proporciona un valor de tasa de aprendizaje alto, y la capacidad de 
-exploración que conseguiríamos con una valor bajo para la tasa.\\
+sobre éste y le añadiremos sucesivas modificaciones con fin de
+estudiar la influencia de cada una en nuestro modelo. Hasta ahora
+habíamos trabajado con una tasa de aprendizaje fija. Este parámetro
+resulta difícil de ajustar, puesto que tenemos que encontrar un
+equilibrio entre la capacidad de explorar el espacio de soluciones que
+nos proporciona un valor de tasa de aprendizaje alto, y la capacidad
+de optimizar los resultados en un entorno pequeño que conseguiríamos
+con una valor bajo para la tasa.\\
 
-Para solventar esta dificultadad de ajustar el parámetro, y conseguir
-una mayor flexibilidad entre la explotación y la exploración del espacio
-de soluciones, utilizaremos una tasa de aprendizaje variable. De esta 
-forma se comienza con un valor de tasa de aprendizaje relativamente alto,
-que nos permita realizar al inicio un buen proceso de exploración, 
-mientras este parámetro se reduce gradualmente, dando así paulatinamente
+Para solventar esta dificultad de ajustar el parámetro, y conseguir
+una mayor flexibilidad entre la explotación y la exploración del
+espacio de soluciones, utilizaremos una tasa de aprendizaje
+variable. De esta forma se comienza con un valor de tasa de
+aprendizaje relativamente alto, que nos permita realizar al inicio un
+buen proceso de exploración, mientras este parámetro se reduce
+gradualmente, dando así paulatinamente
 más importancia al proceso de explotación.\\
 
 Como ya se ha comentado, se utiliza la misma topología para nuestra
-red neuronal que la que tenía el modelo anterior, utilizando también 
-el mismo esquema de aprendizaje con gradiente descendente, pero en esta
+red neuronal que la que tenía el modelo anterior, utilizando también
+el mismo esquema de aprendizaje con gradiente descendente, pero en
+esta
 ocasión con tasa de aprendizaje variable.\\
 
-A continuación vamos a estudiar los resultados obtenidos en la ejecución
-del nuevo modelo.
-
-
+A continuación vamos a estudiar los resultados obtenidos en la
+ejecución del nuevo modelo.
 
 \subsubsection{Gráficas de resumen del aprendizaje}
 
-De forma análoga a como se ha procedido hasta ahora, mostraremos las 
-gráficas sobre la función de pérdida y la capacidad de predicción 
-del modelo a lo largo de su fase de entrenamiento. En primer lugar
+De forma análoga a como se ha procedido hasta ahora, mostraremos las
+gráficas sobre la función de pérdida y la capacidad de predicción del
+modelo a lo largo de su fase de entrenamiento. En primer lugar
 mostramos la función de pérdida:
 
 \begin{figure}[H]
@@ -442,31 +443,28 @@ mostramos la función de pérdida:
 \end{figure}
 
 
-Encontramos por un lado que la disminución de la función de oérdida es 
-mucho más rápida que la que obteníamos en el modelo anterior, bajando 
-muy rápidamente a valores inferiores a 10 y llegando por debajo de la 
-unidad, cuando el modelo anterior no era capaz obtener valores por debajo
-de 100. Veamos a continuación como evoluciona la capacidad de predicción
-del modelo actual.
+Encontramos por un lado que la disminución de la función de pérdida es
+mucho más rápida que la que obteníamos en el modelo anterior, bajando
+muy rápidamente a valores inferiores a 10 y llegando por debajo de la
+unidad, cuando el modelo anterior no era capaz obtener valores por
+debajo de 100. Veamos a continuación como evoluciona la capacidad de
+predicción del modelo actual.
 
 \begin{figure}[H]
-  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_vlr_wd}
+  \centering
+  \includegraphics[width=.95\textwidth]{imgs/accuracy_vlr_wd}
   \caption{Evolución de la capacidad de predicción}
 \end{figure}
 
-En esta ocasión encontramos que aumenta muy rápidamente, pero pronto se
-estanca, no consiguiendo alcanzar una precisión superior al 76\%. En vista
-de las dos gráficas anteriores, y del comportamiento que obteníamos en el
-modelo anterior, podemos deducir que nuestro modelo se centra demasiado
-en reducir el valor de pérdida provocado por la penalización aplicada por
-el \textit{Weight Decay} en lugar de mejorar la solución a nuestro 
-problema. 
+En esta ocasión encontramos que aumenta muy rápidamente, pero pronto
+se estanca, no consiguiendo alcanzar una precisión superior al
+76\%. En vista de las dos gráficas anteriores, y del comportamiento
+que obteníamos en el modelo anterior, podemos deducir que nuestro
+modelo se centra demasiado en reducir el valor de pérdida provocado
+por la penalización aplicada por el \textit{Weight Decay} en lugar de
+mejorar la solución a nuestro problema.
 
-
-
-
-
-\subsection{Tercera mejora: \textit{Variable Learning Rate} (vlr\_model)}
+\subsection{Tercera modificación: \textit{Variable Learning Rate} sin \textit{Weight Decay} (vlr\_model)}
 
 Una vez estudiado el modelo anterior, nos cabe preguntarnos si el uso de
 una tasa de aprendizaje variable nos puede ayudar en aquellos casos en los

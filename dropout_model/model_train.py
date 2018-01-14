@@ -6,7 +6,6 @@ from datetime import datetime
 import time
 
 import tensorflow as tf
-import math
 
 import model
 
