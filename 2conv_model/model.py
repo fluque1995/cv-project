@@ -28,9 +28,6 @@ LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
 INITIAL_LEARNING_RATE = 0.1       # Initial learning rate.
 
 
-TOWER_NAME = 'tower'
-
-
 def _variable_on_cpu(name, shape, initializer):
     with tf.device('/cpu:0'):
         var = tf.get_variable(
@@ -68,11 +65,11 @@ def inference(images):
     # conv1
     with tf.variable_scope('conv1') as scope:
         kernel = _variable_with_weight_decay('weights1',
-                                             shape=[5, 5, 3, 10],
+                                             shape=[5, 5, 3, 40],
                                              stddev=5e-2,
-                                             wd=0.0)
+                                             wd=0.003)
         conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases1', [10],
+        biases = _variable_on_cpu('biases1', [40],
                                   tf.constant_initializer(0.0))
         pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation, name=scope.name)
@@ -84,11 +81,11 @@ def inference(images):
     # conv2
     with tf.variable_scope('conv2') as scope:
         kernel = _variable_with_weight_decay('weights2',
-                                             shape=[5, 5, 10, 20],
+                                             shape=[5, 5, 40, 80],
                                              stddev=5e-2,
-                                             wd=0.0)
+                                             wd=0.002)
         conv = tf.nn.conv2d(pool1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = _variable_on_cpu('biases2', [20],
+        biases = _variable_on_cpu('biases2', [80],
                                   tf.constant_initializer(0.0))
         pre_activation = tf.nn.bias_add(conv, biases)
         conv2 = tf.nn.relu(pre_activation, name=scope.name)

@@ -3,6 +3,8 @@ images/
 model_train/
 model_test/
 model_eval/
+model_train_no_wd/
+model_eval_no_wd/
 auto/
 *~
 *.aux

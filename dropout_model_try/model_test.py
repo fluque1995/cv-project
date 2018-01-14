@@ -59,6 +59,7 @@ def eval_once(summary_saver, top_k_op):
 
             summary = tf.Summary()
             summary.value.add(tag='Precision @ 1', simple_value=precision)
+
             summary_saver.add_summary(summary, global_step)
         except Exception as e:
             coord.request_stop(e)
@@ -74,10 +75,10 @@ def evaluate():
             print("Everything OK. Testing...")
         images, labels = model.inputs(eval_data=eval_data)
 
-        logits = model.inference(images)
+        logits = model.inference(images, is_training=False)
 
         summary_saver = tf.summary.FileWriter(FLAGS.eval_dir)
-
+                
         top_k_op = tf.nn.in_top_k(logits, labels, 1)
 
         while True:
