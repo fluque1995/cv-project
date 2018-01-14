@@ -515,53 +515,173 @@ muy inferior. Esto nos hace plantearnos que debemos establecer un criterio
 de parada, para que la red neuronal finalice su entrenamiento y no se 
 lleguen a estas situaciones.
 
+\subsection{Cuarta modificación: dropout + \textit{early stopping}
+  (drop\_model)}
 
-\subsection{Sección de Paco}
+Vamos ahora a introducir dos modificaciones sobre el modelo básico. En
+primer lugar,
+
+\subsection{Modelo con dos capas de convolución (2conv\_model)}
+
+En este punto de la práctica, probamos a modificar la topología de la
+red. Hasta ahora, todos los cambios que se habían hecho consistían en
+introducir modificaciones y adaptaciones sobre una red neuronal con
+una estructura fijada. Ahora, vamos a investigar si un cambio en la
+estructura de la misma puede ser determinante a la hora de mejorar los
+resultados del aprendizaje. Es por esto que tratamos de crear una
+red más compleja, ahora con dos capas de convolución.\\
 
 
+\subsubsection{Estructura del modelo}
 
+La idea de crear más capas de convolución en la red viene motivada por
+la forma en la que se cree que el cerebro humano procesa las imágenes.
+De esta manera, en las capas más superficiales del cerebro, al
+parecer, se procesan las formas más simples, es decir, se extraen las
+formas más sencillas de la información recopilada por el ojo (líneas,
+puntos...). Esta información se transmite hacia capas más profundas de
+la corteza cerebral, donde se procesan estas formas simples y se
+agrupan para crear elementos más complejos (curvas, polígonos,
+intersecciones...). De esta forma, se parte de un pequeño conjunto de
+formas procesadas por unas pocas neuronas, hasta figuras de alta
+complejidad, como puede ser una persona. Usualmente, el conjunto de
+formas simples es más o menos reducido, mientras que conforme va
+aumentando la complejidad de las mismas, debido a que las formas
+simples se pueden combinar de multitud de maneras distintas, el número
+de formas complejas distintas aumenta.\\
 
+Este argumento es el que sustenta la estructura que se ha dado a esta
+red neuronal. Comenzaremos con una capa de convolución más o menos
+básica, que sólo extrae 40 filtros. A continuación, tendremos otra
+capa de convolución, que extraerá 80 filtros nuevos de los 40 filtros
+anteriores. Después, tendremos la capa de alisamiento, para convertir
+la información almacenada de forma matricial en vector, y dos capas
+completamente conectadas antes de la capa de salida. La primera de
+ellas tendrá 200 neuronas, y la segunda 100. La idea de tener dos
+capas completamente conectadas en lugar de una sigue la misma lógica
+que teníamos anteriormente, aunque ahora de forma inversa. Vamos a ir
+agrupando la información extraída en capas de menor tamaño, pero cuyas
+neuronas vayan extrayendo información del agrupamiento de formas
+complejas. Como el problema que nos ocupa consiste simplemente en
+diferenciar animales de dos clases, no necesitamos un conjunto de
+neuronas muy grande para las capas de salida, si no que puede ser
+interesante tener pocas neuronas que realicen tareas bastante
+específicas.\\
 
-\subsection{modificacion ADABOOST: esquema de aprendizaje mediante adamOptimizer (3adam\_model)}
-
-A lo largo de toda la práctica hemos trabajado con el mismo esquema de 
-aprendizaje: \textit{Gradient Boosting}. En este apartado trataremos con
-uno diferente, \textit{AdamOptimizer}. \textit{AdamOptimizer} consiste en
-un método estocástico para determinar los pesos de nuestra red neuronal.
-La principal ventaja frente al gradiente descendente, es que este se 
-encargará de modificar la tasa de aprendizaje en función de la media
-y el segundo momento de los gradientes, suponiendo así una mejor 
-aproximación.\\
-
-Aunque generalmente arroja mejores resultados que el gradiente descendente,
-en general necesita de redes neuronales con topologías más complejas.
-Trataremos en esta ocasión con una red neuronal de 3 capas de convolución
-y pooling, ya que contamos con restricciones hardware. En la sección
-siguiente definimos en mayor profundidad la arquitectura elegida.
-
-\subsubsection{Estructura de la red}
-
-Como ya se ha comentado, en esta ocasión contaremos con 3 capas de 
-convolución y pool, manteniéndo igual el resto de la estructura que 
-presentabamos en el primer modelo. La primera capa de convolución recibirá
-un batch de 128 imágenes de tamaño $64 \times 64 \times 3$ y extraerá un 
-total de 64 filtros para cada una de las imágenes. Seguido de esto tendremos
-una capa de pool que reduzca el tamaño de las imágenes a la mitad, 
-produciendo así una salida de tamaño $128 \times 32 \times 32 \times 64$.
-A continuación contaremos con una capa de convolución y una capa de pool
-igual a las anteriores. Por tanto, en este punto contaremos con un conjunto
-de imágenes de tamaño $128 \times 16 \times 16 \times 64$. Finalmente, se
-tiene una capa de convolución que extraerá 128 filtros para cada foto, 
-seguida de una capa de pool que de nuevo reducirá el tamaño de las imágenes
-a la mitad, quedándonos así un conjunto de tamaño $128 \times 8 \times 
-8 \times 128$. Esta salida será tomada como entrada para una capa de
-redimensión, que nos producirá una salida de $128 \times 8192$. El resto
-es idéntico al expuesto en el modelo básico.
-
+Se adjunta a continuación el esquema de la red neuronal implementada:
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=1\textwidth]{imgs/adam_model.png}  
+  \includegraphics[width=.7\textwidth]{imgs/2conv_model.png}
+  \caption{Esquema del modelo de red neuronal convolucional con dos
+    capas}
+\end{figure}
+
+En cuanto al esquema de aprendizaje, hemos visto anteriormente que los
+modelos que combinaban un \textit{Weight Decay} con un parámetro
+bajo con una tasa de aprendizaje variable utilizada en el método de
+gradiente descendente tenían un funcionamiento bastante apropiado, así
+que para la primera prueba utilizaremos este esquema de aprendizaje.
+
+\subsubsection{Gráficas de resultados obtenidos}
+
+Al igual que con los modelos anteriores, vamos a mostrar las gráficas
+que muestran el desarrollo del proceso de aprendizaje de la red
+neuronal:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_2conv}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Como podemos observar, hemos conseguido llegar a un valor de la
+función de pérdida muy cercano a 0. Esto significa que esta
+arquitectura consigue optimizar bastante bien la función de pérdida, y
+en un número de pasos relativamente rápido (sólo se han ejecutado 5000
+pasos de aprendizaje).  No obstante, en la gráfica siguiente podemos
+observar que, a pesar de que se ha conseguido reducir la función de
+pérdida mucho, el porcentaje de acierto conseguido por la red no es
+tan bueno como se podría esperar:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.95\textwidth]{imgs/accuracy_2conv}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+Podemos observar, primeramente, que durante la ejecución se produjo un
+importante paso hacia atrás en la capacidad de aprendizaje, en torno
+al paso 3000. No es sencillo explicar este comportamiento, aunque
+teniendo en cuenta el crecimiento de la función de pérdida en torno al
+paso 2700, es posible que el lote de imágenes que se generase fuera
+especialmente complicado de tratar, y se produjera una explosión en el
+gradiente descendente, haciendo que la red perdiese capacidad de
+aprendizaje. En cualquier caso, a pesar de que la red consigue
+resultados bastante buenos, llegando hasta una capacidad de predicción
+de un 82 \% en apenas 4500 pasos de aprendizaje, no son del todo
+satisfactorios. Hemos escogido una red de mayor complejidad que las
+anteriores, y a pesar de ello los resultados son peores que los
+obtenidos por redes más sencillas.\\
+
+Esto, unido a las restricciones de hardware que tenemos (usualmente,
+las redes neuronales se entrenan en ordenadores de mucha capacidad,
+con unidades de cálculo optimizadas para el trabajo vectorial), nos
+hace abandonar esta línea, ya que la modificación de parámetros y
+reentrenamiento de las redes es un proceso muy costoso y que consume
+mucho tiempo. Como no encontramos indicios de que esta línea pudiera
+llevar a resultados realmente interesantes, se decide que no merece la
+pena la inversión de tiempo en este sentido, e invertir ese tiempo en
+otros de los modelos que aparecen comentados a lo largo de la
+práctica.
+
+\subsection{3 capas de convolución: aprendizaje mediante adamOptimizer
+  (3adam\_model)}
+
+A lo largo de toda la práctica hemos trabajado con el mismo esquema de
+aprendizaje: \textit{Gradient Descent}. En este apartado trataremos
+con uno diferente, \textit{AdamOptimizer}. \textit{AdamOptimizer}
+consiste en un método estocástico para determinar los pesos de nuestra
+red neuronal.  La principal ventaja frente al gradiente descendente,
+es que este se encargará de modificar la tasa de aprendizaje en
+función de la media y el segundo momento de los gradientes, suponiendo
+así una mejor
+aproximación.\\
+
+Aunque generalmente arroja mejores resultados que el gradiente
+descendente, en general necesita de redes neuronales con topologías
+más complejas.  Trataremos en esta ocasión con una red neuronal de 3
+capas de convolución y pooling, ya que contamos con restricciones
+hardware, como se ha comentado en el apartado anterior. A pesar de
+ello, se implementa esta red para tratar de probar otros esquemas de
+aprendizaje, ya que en la literatura especializada muchos autores
+coinciden en que el esquema de aprendizaje \textit{Gradient Descent}
+es muy arcaico y los resultados obtenidos por el mismo son muy
+mejorables. En la sección siguiente definimos en mayor profundidad la
+arquitectura elegida.
+
+\subsubsection{Estructura de la red}
+
+Como ya se ha comentado, en esta ocasión contaremos con 3 capas de
+convolución y pool, manteniéndo igual el resto de la estructura que
+presentabamos en el primer modelo. La primera capa de convolución
+recibirá un batch de 128 imágenes de tamaño $64 \times 64 \times 3$ y
+extraerá un total de 64 filtros para cada una de las imágenes. Seguido
+de esto tendremos una capa de pool que reduzca el tamaño de las
+imágenes a la mitad, produciendo así una salida de tamaño
+$128 \times 32 \times 32 \times 64$.  A continuación contaremos con
+una capa de convolución y una capa de pool igual a las anteriores. Por
+tanto, en este punto contaremos con un conjunto de imágenes de tamaño
+$128 \times 16 \times 16 \times 64$. Finalmente, se tiene una capa de
+convolución que extraerá 128 filtros para cada foto, seguida de una
+capa de pool que de nuevo reducirá el tamaño de las imágenes a la
+mitad, quedándonos así un conjunto de tamaño
+$128 \times 8 \times 8 \times 128$. Esta salida será tomada como
+entrada para una capa de redimensión, que nos producirá una salida de
+$128 \times 8192$. El resto es idéntico al expuesto en el modelo
+básico.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=1\textwidth]{imgs/adam_model.png}
   \caption{Esquema del modelo de red neuronal convolucional}
 \end{figure}
 
@@ -570,7 +690,7 @@ es idéntico al expuesto en el modelo básico.
 
 \subsubsection{Gráficas de resumen del aprendizaje}
 
-Una vez explicado 
+Una vez explicado
 
 
 \printbibliography
