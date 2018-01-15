@@ -516,10 +516,50 @@ de parada, para que la red neuronal finalice su entrenamiento y no se
 lleguen a estas situaciones.
 
 \subsection{Cuarta modificación: dropout + \textit{early stopping}
-  (drop\_model)}
+  (dropout\_model)}
 
 Vamos ahora a introducir dos modificaciones sobre el modelo básico. En
-primer lugar,
+primer lugar, se va a introducir una pequeña modificación a la
+estructura de la red. Realmente esta modificación no supone un cambio
+notable en la topología de la misma, aunque en TensorFlow se
+implementa como una capa más dentro de la red neuronal. Nos referimos
+a una técnica que se conoce como \textit{dropout}. Esta técnica
+consiste en, mientras se está en la fase de entrenamiento, desactivar
+la salida de algunas neuronas (hacer que su salida sea 0), para evitar
+que la capacidad de clasificación de la red se concentre en unas pocas
+de neuronas exclusivamente. Lo que se hace es colocar una capa de tipo
+\texttt{dropout} tras la capa de la red a la que se quiere aplicar
+esta modificación. Esta capa acepta como parámetros una capa de una
+red neuronal (a fin de cuentas, esto es un vector de pesos), y un
+parámetro entre 0 y 1, que es la probabilidad de conservar una
+determinada neurona. En función a ese parámetro, lo que se hace es
+generar un número aleatorio para cada una de las neuronas de la red,
+que decidirá si dicha neurona está activa o inactiva en ese paso del
+aprendizaje. En caso de que la neurona haya de quedar activa, se
+multiplica el valor de salida de la misma por $\frac{1}{p}$, donde p
+es la probabilidad de conservar a la neurona. Si la neurona ha de
+quedar inactiva, se reemplaza su valor por 0. La multiplicación se
+realiza para que la norma del vector de salida de la red neuronal sea
+similar a la que tendría en caso de tener todas las neuronas
+activas. Durante la evaluación de la red neuronal, esta capa no se
+ejecuta, ya que se quiere que todas las neuronas participen
+en el proceso de clasificación de imágenes al final.\\
+
+La idea de utilizar esta técnica apareció hace relativamente poco
+tiempo (según \cite{book-tf}, fue propuesta en 2012, y detallada en
+2014). El argumento que sustenta esta técnica es que, usualmente, los
+equipos de trabajo funcionan mejor cuando la carga se reparte de forma
+más o menos equitativa entre todos los miembros que lo conforman. Al
+obligar a la no participación de algunas de las neuronas durante
+algunas etapas del entrenamiento, se evita que toda la carga de la
+clasificación se concentre en una sola parte de la red, haciendo que
+todas tengan cierta importancia a la hora de clasificar las imágnes.
+Según se comenta en \cite{Srivastava:2014:DSW:2627435.2670313}, que es
+el paper en el que se detalla la técnica, se consigue mejorar la capacidad
+de predicción de redes neuronales complejas hasta en un 3 \%, lo que
+supone una mejora notable si nos estamos moviendo en capacidades de
+predicción cercanas al 90 \%. Veamos a continuación cómo se ha comportado
+nuestra red neuronal ante esta modificación.
 
 \subsection{Modelo con dos capas de convolución (2conv\_model)}
 
@@ -691,7 +731,6 @@ básico.
 \subsubsection{Gráficas de resumen del aprendizaje}
 
 Una vez explicado
-
 
 \printbibliography
 
