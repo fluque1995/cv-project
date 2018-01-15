@@ -63,21 +63,21 @@ def train():
                 self.loss_thresh = loss_thresh
                 self.steps_thresh = steps_thresh
 
-                def begin(self):
-                    self.curr_steps = -1
-                    self.curr_loss = math.inf
+            def begin(self):
+                self.curr_steps = -1
+                self.curr_loss = math.inf
                     
-                    def before_run(self, run_context):
+            def before_run(self, run_context):
                         self.curr_steps += 1
                         return tf.train.SessionRunArgs(loss)
 
-                    def after_run(self, run_context, run_values):
-                        loss_value = run_values.results
-                        if self.curr_loss - loss_value > self.loss_thresh:
-                            self.curr_loss = loss_value
-                            self.curr_steps = 0
-                        elif self.curr_steps > self.steps_thresh:
-                            print("Finished training by early stopping")
+            def after_run(self, run_context, run_values):
+                loss_value = run_values.results
+                if self.curr_loss - loss_value > self.loss_thresh:
+                    self.curr_loss = loss_value
+                    self.curr_steps = 0
+                elif self.curr_steps > self.steps_thresh:
+                    print("Finished training by early stopping")
 
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=FLAGS.train_dir,

@@ -27,10 +27,11 @@ tf.app.flags.DEFINE_boolean('run_once', False,
                             """Whether to run eval only once.""")
 
 
-def eval_once(saver, summary_writer, top_k_op, summary_op):
+def eval_once(summary_saver, top_k_op):
     with tf.Session() as sess:
         ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
+            saver = tf.train.Saver()
             saver.restore(sess, ckpt.model_checkpoint_path)
             global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
         else:
@@ -57,9 +58,8 @@ def eval_once(saver, summary_writer, top_k_op, summary_op):
             print('%s: precision @ 1 = %.3f' % (datetime.now(), precision))
 
             summary = tf.Summary()
-            summary.ParseFromString(sess.run(summary_op))
             summary.value.add(tag='Precision @ 1', simple_value=precision)
-            summary_writer.add_summary(summary, global_step)
+            summary_saver.add_summary(summary, global_step)
         except Exception as e:
             coord.request_stop(e)
 
@@ -74,21 +74,14 @@ def evaluate():
             print("Everything OK. Testing...")
         images, labels = model.inputs(eval_data=eval_data)
 
-        logits = model.inference(images)
+        logits = model.inference(images, False)
 
         top_k_op = tf.nn.in_top_k(logits, labels, 1)
 
-        variable_averages = tf.train.ExponentialMovingAverage(
-            model.MOVING_AVERAGE_DECAY)
-        variables_to_restore = variable_averages.variables_to_restore()
-        saver = tf.train.Saver(variables_to_restore)
-
-        summary_op = tf.summary.merge_all()
-
-        summary_writer = tf.summary.FileWriter(FLAGS.eval_dir, g)
+        summary_saver = tf.summary.FileWriter(FLAGS.eval_dir, g)
 
         while True:
-            eval_once(saver, summary_writer, top_k_op, summary_op)
+            eval_once(summary_saver, top_k_op)
             if FLAGS.run_once:
                 break
             time.sleep(FLAGS.eval_interval_secs)

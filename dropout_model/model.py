@@ -24,7 +24,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
 NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
 LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
-INITIAL_LEARNING_RATE = 0.1       # Initial learning rate.
+INITIAL_LEARNING_RATE = 0.01       # Initial learning rate.
 
 
 def _variable_on_cpu(name, shape, initializer):
@@ -60,7 +60,7 @@ def inputs(eval_data):
     return images, labels
 
 
-def inference(images):
+def inference(images, is_training=True):
     # conv
     with tf.variable_scope('conv') as scope:
         kernel = _variable_with_weight_decay('weights',
@@ -88,6 +88,9 @@ def inference(images):
         local = tf.nn.relu(
             tf.matmul(reshape, weights) + biases, name=scope.name
         )
+
+    if is_training:
+        local = tf.nn.dropout(local, 0.25, name="dropout")
 
     with tf.variable_scope('softmax_linear') as scope:
         weights = _variable_with_weight_decay('weights', [384, NUM_CLASSES],
