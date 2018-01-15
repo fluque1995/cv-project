@@ -515,7 +515,81 @@ muy inferior. Esto nos hace plantearnos que debemos establecer un criterio
 de parada, para que la red neuronal finalice su entrenamiento y no se 
 lleguen a estas situaciones.
 
-\subsection{Cuarta modificación: dropout + \textit{early stopping}
+
+
+
+\subsection{Cuarta modificación: \textit{Normalización} (norm\_model)}
+
+Puesto que el modelo anterior nos arrojaba realmente buenos resultados,
+nos proponemos quedarnos con él y añadirle una modificación en búsqueda
+de unos mejores resultados. Sabemos que, en general, los clasificadores
+y los regresores trabajan mejor con datos normalizados. Nos proponemos
+por tanto añadir una capa de normalización a nuestro modelo.\\
+
+Tomaremos la normalización \textit{local\_response\_normalization}
+implementada en \textit{TensorFlow}. Puesto que trabajamos con datos
+de 4 dimensiones, el normalizador supondrá que trabaja con arrays 
+tridimensionales, en los que cada elemento es un vector unidimensional.
+Sera sobre cada uno de estos vectores sobre los que se aplicará la 
+normalización.
+
+\subsubsection{Estructura de la red}
+
+La arquitectura que tendremos en este modelo será idéntica a la
+básica, pero precisaremos de una capa de normalización tras la 
+capa de \textit{pool}. Queda por tanto la topología de nuestra
+red neuronal como sigue:
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.8\textwidth]{imgs/norm_model.png}  
+  \caption{Esquema del modelo con normalización de red neuronal convolucional}
+\end{figure}
+
+
+
+\subsubsection{Gráficas de resumen del aprendizaje}
+
+
+Vamos a continuación a estudiar los datos arrojados por nuestro
+modelo.
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_norm}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Encontramos que la red presenta un buen comportamiento, ya que baja
+rápidamente el valor de la pérdida y consigue mantenerlo estable
+siempre con tendencia a decrecer. Sin embargo, encontramos un punto 
+en el cual alcanza un valor considerablemente alto. A partir de este 
+punto consigue reducir su valor pero quedando siempre por encima de 
+los valores en los que se encontraba antes.
+
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_norm}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+A pesar de que la clasificación empieza realmente mal, con menos de un 
+40\% de clasificación, la red neuronal consigue mejorar poco a poco y
+estabilizarse en valores relativamente buenos, moviéndose entre los 
+pasos 2200 y 4200 por encima del 86\% de acierto. Sin embargo, 
+encontramos un punto en el que la capacidad de predicción baja 
+notablemente, alcanzando casi su valor mínimo y, aunque consigue mejorar,
+queda muy lejos de los resultados que anteriormente alcanzaba.\\
+
+A pesar de que este modelo también a demostrado alcanzar un buen 
+funcionamiento, la máxima capacidad de predicción ha sido de 88.2\%,
+ligeramente inferior a la que conseguíamos en el modelo anterior. Además,
+la aplicación de la normalización ralentiza considerablemente el proceso
+de aprendizaje. Por tanto, en principio descartaremos la aplicación de
+la capa de normalización. 
+
+
+\subsection{Quinta modificación: dropout + \textit{early stopping}
   (dropout\_model)}
 
 Vamos ahora a introducir dos modificaciones sobre el modelo básico. En
