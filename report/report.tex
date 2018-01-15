@@ -641,11 +641,13 @@ A lo largo de toda la práctica hemos trabajado con el mismo esquema de
 aprendizaje: \textit{Gradient Descent}. En este apartado trataremos
 con uno diferente, \textit{AdamOptimizer}. \textit{AdamOptimizer}
 consiste en un método estocástico para determinar los pesos de nuestra
-red neuronal.  La principal ventaja frente al gradiente descendente,
-es que este se encargará de modificar la tasa de aprendizaje en
-función de la media y el segundo momento de los gradientes, suponiendo
-así una mejor
-aproximación.\\
+red neuronal. \textit{AdamOptimizer} trata de optimizar el método de
+gradiente descendente siendo más eficiente temporalmente, así como 
+conseguir una mejor variación de la tasa de aprendizaje que se ajuste
+a nuestro problema combinando para ello los métodos de optimización
+de los momentos y \textit{RMSProp}.\\
+
+
 
 Aunque generalmente arroja mejores resultados que el gradiente
 descendente, en general necesita de redes neuronales con topologías
@@ -662,7 +664,7 @@ arquitectura elegida.
 \subsubsection{Estructura de la red}
 
 Como ya se ha comentado, en esta ocasión contaremos con 3 capas de
-convolución y pool, manteniéndo igual el resto de la estructura que
+convolución y pool, manteniendo igual el resto de la estructura que
 presentabamos en el primer modelo. La primera capa de convolución
 recibirá un batch de 128 imágenes de tamaño $64 \times 64 \times 3$ y
 extraerá un total de 64 filtros para cada una de las imágenes. Seguido
@@ -678,7 +680,9 @@ mitad, quedándonos así un conjunto de tamaño
 $128 \times 8 \times 8 \times 128$. Esta salida será tomada como
 entrada para una capa de redimensión, que nos producirá una salida de
 $128 \times 8192$. El resto es idéntico al expuesto en el modelo
-básico.
+básico.\\
+
+En la siguiente imagen podemos ver el esquema descrito:
 
 \begin{figure}[H]
   \centering \includegraphics[width=1\textwidth]{imgs/adam_model.png}
@@ -690,7 +694,57 @@ básico.
 
 \subsubsection{Gráficas de resumen del aprendizaje}
 
-Una vez explicado
+Una vez explicada la arquitectura de la red, pasamos analizar el 
+comportamiento de la misma.
+
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_adam_1}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+
+En la gráfica anterior tan solo podemos ver que, en el momento inicial,
+la función de pérdida alcanza un valor del orden de $10^7$. Sin embargo,
+esto tan solo es consecuencia de la inicialización, ya que encontramos 
+que inmediatamente el valor tomado por la función de pérdida desciende.
+Poco más se puede extraer de la gráfica anterior, ya que los datos 
+a partir del paso 100 son prácticamente nulos en comparación con el 
+inicial. Para poder estudiar mejor el comportamiento de esta función 
+vamos entonces a mostrar la gráfica de la función de pérdida a partir
+del paso 200.
+
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_adam_2}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Ahora sí podemos observar como la función de pérdida desciende de 
+forma regular hasta alcanzar un valor de casi 300. A pesar de que
+los valores siguen siendo considerablemente altos y la pendiente
+de la curva anterior considerable, se paró el entrenamiento tras
+8 horas desde su inicio.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.95\textwidth]{imgs/accuracy_adam}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+
+Sobre la gráfica anterior, nos muestra una capacidad de predicción
+más o menos estable, con diferencias de como mucho un 1\% a lo largo de 
+3000 pasos, lo cual no es muy prometedor. En cuanto a la capacidad de
+predicción en sí, en ningún punto llega a alcanzar el 68\% de acierto.
+Estos suponen los peores resultados obtenidos hasta el momento. Además,
+ha sido la red que más recursos temporales ha consumido, por lo que
+este modelo quedaría descartado. \\
+
+Probablemente con mayor capacidad de cómputo, y por tanto la posibilidad
+de crear una red más compleja, con un mayor número de capas, y cada una 
+con más neuronas, conseguiríamos resultados considerablemente mejores
+gracias a \textit{AdamOptimizer}.
 
 
 \printbibliography
