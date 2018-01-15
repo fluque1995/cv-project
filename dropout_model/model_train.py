@@ -78,6 +78,7 @@ def train():
                     self.curr_steps = 0
                 elif self.curr_steps > self.steps_thresh:
                     print("Finished training by early stopping")
+                    raise StopIteration
 
         with tf.train.MonitoredTrainingSession(
                 checkpoint_dir=FLAGS.train_dir,

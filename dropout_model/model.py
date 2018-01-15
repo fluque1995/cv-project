@@ -90,7 +90,7 @@ def inference(images, is_training=True):
         )
 
     if is_training:
-        local = tf.nn.dropout(local, 0.25, name="dropout")
+        local = tf.nn.dropout(local, 0.4, name="dropout")
 
     with tf.variable_scope('softmax_linear') as scope:
         weights = _variable_with_weight_decay('weights', [384, NUM_CLASSES],
