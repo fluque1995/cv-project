@@ -13,6 +13,8 @@ tf.app.flags.DEFINE_string('eval_data', 'test',
 tf.app.flags.DEFINE_string('checkpoint_dir', './model_train',
                            """Directory where to read model checkpoints.""")
 
+filenames = ['cat.jpg', 'lina.png', 'doge.jpg', 'doge.png']
+
 
 def evaluate(file_name):
 
@@ -46,8 +48,8 @@ def evaluate(file_name):
 
 
 def main(argv=None):
-    filename = argv[1]
-    evaluate(filename)
+    for name in filenames:
+        evaluate('../sample_images/' + name)
 
 
 if __name__ == '__main__':

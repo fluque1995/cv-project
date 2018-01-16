@@ -515,9 +515,6 @@ muy inferior. Esto nos hace plantearnos que debemos establecer un criterio
 de parada, para que la red neuronal finalice su entrenamiento y no se 
 lleguen a estas situaciones.
 
-
-
-
 \subsection{Cuarta modificación: \textit{Normalización} (norm\_model)}
 
 Puesto que el modelo anterior nos arrojaba realmente buenos resultados,
@@ -567,7 +564,6 @@ en el cual alcanza un valor considerablemente alto. A partir de este
 punto consigue reducir su valor pero quedando siempre por encima de 
 los valores en los que se encontraba antes.
 
-
 \begin{figure}[H]
   \centering \includegraphics[width=.95\textwidth]{imgs/accuracy_norm}
   \caption{Evolución de la capacidad de predicción}
@@ -587,7 +583,6 @@ ligeramente inferior a la que conseguíamos en el modelo anterior. Además,
 la aplicación de la normalización ralentiza considerablemente el proceso
 de aprendizaje. Por tanto, en principio descartaremos la aplicación de
 la capa de normalización. 
-
 
 \subsection{Quinta modificación: dropout + \textit{early stopping}
   (dropout\_model)}
@@ -629,11 +624,156 @@ algunas etapas del entrenamiento, se evita que toda la carga de la
 clasificación se concentre en una sola parte de la red, haciendo que
 todas tengan cierta importancia a la hora de clasificar las imágnes.
 Según se comenta en \cite{Srivastava:2014:DSW:2627435.2670313}, que es
-el paper en el que se detalla la técnica, se consigue mejorar la capacidad
-de predicción de redes neuronales complejas hasta en un 3 \%, lo que
-supone una mejora notable si nos estamos moviendo en capacidades de
-predicción cercanas al 90 \%. Veamos a continuación cómo se ha comportado
-nuestra red neuronal ante esta modificación.
+el paper en el que se detalla la técnica, se consigue mejorar la
+capacidad de predicción de redes neuronales complejas hasta en un 3
+\%, lo que supone una mejora notable si nos estamos moviendo en
+capacidades de predicción cercanas al 90 \%.\\
+
+También hemos introducido una modificación a la operación de
+entrenamiento de la red. Esta modificación es lo que se conoce como
+\textit{early stopping}. La mejora consiste en establecer una
+condición de parada al entrenamiento, de forma que cuando parezca que
+el aprendizaje se ha estabilizado, se deje de entrenar la red
+neuronal. Esto se hace porque se considera que, una vez estabilizada
+la función de error durante muchas iteraciones, se ha llegado a un
+óptimo, probablemente no global, pero sí local. Seguir realizando
+iteraciones de aprendizaje una vez se ha llegado a este estado, suele
+tener consecuencias negativas. Por un lado, si se sigue intentando
+reducir la función de error más de lo que ya se ha conseguido, se
+puede producir un sobreaprendizaje, que es un comportamiento bastante
+común en las redes neuronales. Por otro, el sobreentrenamiento de la
+red puede provocar que se den pasos hacia atrás, como hemos podido
+observar en algunos de los modelos mostrados en la práctica.\\
+
+Para tratar de evitar este fenómeno, se implementa la siguiente
+técnica. Se va llevando un recuento de las iteraciones que han pasado
+desde el mejor valor de la función de pérdida obtenido hasta el
+momento. Si se llegan a producir un número determinado de iteraciones
+desde el momento en que se alcanzó el mínimo sin que se haya reducido
+el valor de la función, se considera que se ha ancanzado la tasa de
+aprendizaje óptima y se para el proceso
+de aprendizaje.\\
+
+Para la implementación de esta técnica, utilizaremos una de las
+funcionalidades aportadas por TensorFlow, la cual se conoce como
+\textit{Hooks}. Estos \textit{Hooks} son fragmentos de código
+encapsulados en clases, que implementan ciertos métodos que se
+ejecutan antes y después del proceso de aprendizaje. De esta forma, en
+dicha clase tendremos cuatro valores, dos de ellos que se irán
+modificando durante la ejecución, que son el número de iteraciones que
+llevamos sin mejorar la función de pérdida, y el valor más bajo
+obtenido hasta el momento, y dos fijos que se inicializarán por el
+usuario al principio de la ejecución. Dichos valores son el número
+máximo de iteraciones que han de pasar hasta considerar que se ha
+estancado el aprendizaje, y el valor que límite a partir
+del cual se considera que se ha producido mejora.\\
+
+Se ejecuta el código de esta clase cada vez que se realiza una etapa
+de entrenamiento. Si la función de pérdida no se ha decrementado lo
+suficiente (valor marcado por el límite) en el número indicado de
+pasos, se corta la ejecución. No se establece el límite en 0, que
+significaría simplemente mejorar el valor de la función de pérdida,
+porque una mejora muy pequeña reiniciaría el proceso, y tratamos de
+buscar mejoras significativas en la función de pérdida. Por este
+motivo se establece el umbral. En caso de que sí que se consiguiera
+mejorar la función de pérdida, simplemente se reinicia el contador,
+se actualiza el mejor valor de la función de pérdida, y se sigue
+el proceso de aprendizaje normalmente.\\
+
+Veamos a continuación cómo se ha comportado nuestra red neuronal ante
+estas modificaciones.
+
+\subsubsection{Gráficas de resumen del aprendizaje}
+
+A pesar de que se han realizado varios intentos para ajustar el
+parámetro que mide la probabilidad de desactivar una neurona o
+mantenerla activa, en este documento sólo se muestra la mejor solución
+obtenida. El ajuste preciso de este parámetro es realmente complejo,
+ya que una probabilidad muy alta de descartar neuronas provoca que el
+modelo no ajuste bien la capacidad de predicción, y se produzca
+\textit{underfitting}. Por otro lado, si la probabilidad de mantener a
+las neuronas es alta, se da el fenómeno contrario, y no se observan
+mejoras significativas por el uso de la técnica.\\
+
+En nuestro caso, se ha encontrado que una aplicación agresiva de la
+técnica (la probabilidad de descartar una neurona era del 80 \%), ha
+dado los mejores resultados de todas las ejecuciones. Como veremos a
+continuación, es el modelo que más se ha acercado a una capacidad de
+predicción del 90 \%. Concretamente, se llega a observar en varias de
+las ejecuciones un valor de $89.5 \%$ de tasa de acierto. Ninguno de
+los modelos anteriores había conseguido superar la barrera del 89 \%,
+aunque sí que habíamos tenido valores muy cercanos (el modelo en el
+que se basa éste, pero que no implementaba \textit{dropout} consiguió
+un $88.9 \%$). A pesar de que no hemos conseguido aumentar tanto el
+valor como se conseguía en el paper, en el que se llega a una mejora
+de casi el 3 \%, sí que hemos conseguido cierta mejora, lo que hace
+pensar que esta técnica puede arrojar resultados realmente
+prometedores.\\
+
+Se probaron distintos valores de probabilidad de descarte de la
+neurona, como se ha dicho anteriormente. Se comenzó con una
+probabilidad de descarte baja, de un 40 \% (concretamente, en
+tensorflow se especifica la probabilidad, entre 0 y 1, de conservar
+una neurona, por lo que establecimos el parámetro en $0.6$). Con este
+valor ya se consiguió superar la barrera del 89 \%, llegándose a una
+precisión en el conjunto de test de $89.2 \%$. Dado que la mejora nos
+parecía poca, se decide decrementar el valor del parámetro, hasta
+$0.4$, es decir, una probabilidad de descarte del 60 \%. Al obtener
+unos resultados similares, se vuelve a probar su decremento hasta
+$0.2$, donde se consiguen los resultados mostrados. Al ver que se
+obtenía mejoría, se vuelve a decrementar el mismo hasta $0.1$, donde
+nos encontramos el problema del \textit{underfitting} que hemos
+comentado anteriormente. A pesar de que se consigue decrementar
+enormemente el valor de la función de pérdida, la capacidad de
+predicción de la red en test no supera el 70 \%, uno de los peores
+resultados obtenidos en la práctica. Se decide entonces fijar el valor
+de probabilidad de conservar una neurona en $0.2$ y terminar con la
+búsqueda en este contexto.
+
+Además, en la gráfica de evolución de la función de pérdida que se
+adjunta, se podrá observar cómo ha funcionado el \textit{early
+  stopping}.  En esta ejecución, se considera que se ha dejado de
+mejorar si se ejecutan 100 iteraciones de aprendizaje y no se ha
+reducido el valor de la función de pérdida al menos en
+$0.1$. Mostramos la gráfica de evolución de la función de pérdida:
+
+\begin{figure}[H]
+  \centering \includegraphics[width=.95\textwidth]{imgs/loss_dropout}
+  \caption{Evolución de la función de pérdida}
+\end{figure}
+
+Aunque sea difícilmente apreciable, dada la escala de la gráfica,
+cuando se llega a un estancamiento total de la función de pérdida, el
+modelo termina el entremiento de forma automática. Este modelo estaba
+programado para entrenar durante 100000 iteraciones, pero en menos de
+20000 se estanca la función de pérdida y se detiene la ejecución. En
+cuanto a la gráfica de capacidad de predicción, los resultados
+obtenidos son los que siguen:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.95\textwidth]{imgs/accuracy_dropout}
+  \caption{Evolución de la capacidad de predicción}
+\end{figure}
+
+Donde se puede observar que casi se llega al 90 \%. Como ya hemos
+mencionado, se consigue una precisión de $89.5$, que es el valor más
+alto obtenido hasta este punto de la práctica. De hecho, comparando
+las gráficas de precisión en test de los dos mejores modelos
+implementados, podemos observar las diferencias que hay entre ellos.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.95\textwidth]{imgs/accuracy_comparison}
+  \caption{Comparativa de la capacidad de predicción de los dos
+    mejores modelos}
+\end{figure}
+
+Se observa que el \textit{dropout}, además de mejorar los resultados,
+parece arrojar un modelo más estable, ya que se evita el decrecimiento
+en la capacidad de predicción que tenía el anterior modelo. Hemos dado
+por tanto un paso importante en la mejora de la red neuronal
+convolucional.
 
 \subsection{Modelo con dos capas de convolución (2conv\_model)}
 
@@ -644,7 +784,6 @@ una estructura fijada. Ahora, vamos a investigar si un cambio en la
 estructura de la misma puede ser determinante a la hora de mejorar los
 resultados del aprendizaje. Es por esto que tratamos de crear una
 red más compleja, ahora con dos capas de convolución.\\
-
 
 \subsubsection{Estructura del modelo}
 
@@ -803,20 +942,15 @@ En la siguiente imagen podemos ver el esquema descrito:
   \caption{Esquema del modelo de red neuronal convolucional}
 \end{figure}
 
-
-
-
 \subsubsection{Gráficas de resumen del aprendizaje}
 
 Una vez explicada la arquitectura de la red, pasamos analizar el 
 comportamiento de la misma.
 
-
 \begin{figure}[H]
   \centering \includegraphics[width=.95\textwidth]{imgs/loss_adam_1}
   \caption{Evolución de la función de pérdida}
 \end{figure}
-
 
 En la gráfica anterior tan solo podemos ver que, en el momento inicial,
 la función de pérdida alcanza un valor del orden de $10^7$. Sin embargo,
@@ -857,6 +991,114 @@ Probablemente con mayor capacidad de cómputo, y por tanto la posibilidad
 de crear una red más compleja, con un mayor número de capas, y cada una 
 con más neuronas, conseguiríamos resultados considerablemente mejores
 gracias a \textit{AdamOptimizer}.
+
+\section{Conclusiones}
+
+A lo largo de la práctica se han implementado modelos de redes
+neuronales convolucionales para estudiar cómo se comportan los mismos
+a la hora de la tarea de la clasificación de imágenes, afrontanto para
+ello el problema de distinguir imágenes de gatos y perros.\\
+
+Con los distintos modelos que se han implementado, se ha podido
+observar que, aunque un esquema simple de red neuronal convolucional
+puede no aportar resultados muy satisfactorios, la introducción de
+modificaciones puede conseguir que un modelo que a priori es de mala
+calidad consiga beneficios notables. Esto se pone de manifiesto muy
+claramente cuando se incorporan métodos de regularización como
+\textit{Weight Decay}, o se utilizan tasas de aprendizaje variables.
+No obstante, también hemos podido comprobar que el ajuste de
+parámetros de las modificaciones puede no ser sencillo, y que métodos
+que independientemente deberían aportar mejoras, cuando se combinan
+pueden dar lugar a resultados no satisfactorios. Es necesario estudiar
+la estructura detalladamente para tratar de conseguir los resultados
+óptimos.\\
+
+Se ha puesto de manifiesto también que las necesidades de cómputo a la
+hora de entrenar redes neuronales convolucionales es alta. Se ha
+estado trabajando con redes con una única capa de convolución, que ha
+dado resultados bastante buenos, pero probablemente se podrían haber
+mejorados estos con arquitecturas más profundas. Las limitaciones
+impuestas por el uso de los ordenadores personales, y los malos
+resultados obtenidos en las primeras ejecuciones en las que se
+abordaban redes más profundas nos hizo abandonar rápidamente esta
+línea de investigación.\\
+
+Otro punto que puede ser destacable y que limita la capacidad de
+aprendizaje de la red neuronal es el conjunto de datos utilizado. Tal
+y como se describió al principio, nos encontramos ante un conjunto de
+datos bastante desbalanceado, ya que se dispone del doble de imágenes
+de perros que de gatos. A pesar de que no parece haber tenido mucha
+afectación en los resultados obtenidos, es posible que un mayor balanceo
+en las clases hubiera aportado mejores resultados.\\
+
+\subsection{Uso final de la red neuronal para la predicción de imágenes}
+
+Una vez concluida la etapa de investigación, se trata de poner en
+aplicación real el modelo entrenado. Para ello, se ha desarrollado
+un programa simple, que lee una imagen pasada como argumento, y trata
+de clasificar la misma utilizando el mejor modelo de red neuronal que
+se ha obtenido. Una vez clasificada la imagen, se muestra por pantalla
+la misma, junto con la predicción realizada. A continuación se muestran
+las ejecuciones de dicho programa para distintas imágenes:
+
+\begin{figure*}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=.8\textwidth]{imgs/predict_cat_correct}
+    \caption{Predicción sobre el gato de María del Mar}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=.8\textwidth]{imgs/predict_cat_correct_2}
+    \caption{Predicción sobre el gato de Paco}
+  \end{subfigure}
+\end{figure*}
+
+Como se puede observar, la red neuronal tiene capacidad para reconocer
+gatos en las imágenes, y para las dos imágenes de prueba que se han
+aportado, consigue hacer una predicción correcta. No obstante, como
+veremos a continuación, la red entrenada no es perfecta, y puede cometer
+errores de predicción:
+
+\begin{figure*}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=.8\textwidth]{imgs/predict_dog_correct}
+    \caption{Predicción correcta de un perro}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=.8\textwidth]{imgs/predict_dog_wrong}
+    \caption{Predicción incorrecta de un perro (cree que es un gato)}
+  \end{subfigure}
+\end{figure*}
+
+\subsection{Ejecución de la práctica para contrastar los resultados}
+
+Para evitar adjuntar toda la información de todos los modelos
+entrenados, ya que se han generado más de 4GB de información entre
+todos ellos, pero que esta última parte de la práctica sí que pueda
+ser ejecutada, se ha subido a Consigna UGR una carpeta con el modelo
+más potente ya entrenado. En dicha carpeta se puede encontrar el
+modelo entrenado, las imágenes que se han usado para el entrenamiento
+y el test, y las imágenes que se han utilizado como ejemplo para
+comprobar el buen funcionamiento de la red con ejemplos de imágenes
+reales. Además, aparecen los archivos de texto que especifican el
+conjunto de entrenamiento y test. Para ejecutar el modelo, hay que
+dirigirse a la carpeta \texttt{submit\_model} y ejecutar el archivo
+\texttt{predict\_images.py}. Una vez ejecutado, se mostrarán por
+pantalla, de forma ordenada, las cuatro imágenes predichas. Es
+necesario tener instalado TensorFLow en su versión más reciente (1.4)
+para poder ejecutarlo. También puede reentrenarse este modelo
+ejecutando el archivo \texttt{model\_train.py}, o evaluar su capacidad
+de predicción sobre el conjunto de test ejecutando el archivo
+\texttt{model\_test.py}. La URL desde la que se pueden descargar
+estos archivos es
+\url{https://consigna.ugr.es/f/3pN90VdApiS8OEi0/submit_model.zip}
 
 \printbibliography
 

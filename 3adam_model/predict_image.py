@@ -1,15 +1,8 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from datetime import datetime
-import math
-import time
-
-import numpy as np
 import tensorflow as tf
 
-import model, input
+import model
+import input
+import matplotlib.pyplot as plt
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -20,13 +13,17 @@ tf.app.flags.DEFINE_string('eval_data', 'test',
 tf.app.flags.DEFINE_string('checkpoint_dir', './model_train',
                            """Directory where to read model checkpoints.""")
 
-def evaluate(file_name, real_label):
 
-    with tf.Graph().as_default() as g:
+def evaluate(file_name):
+
+    with tf.Graph().as_default():
         eval_data = FLAGS.eval_data == 'test'
         if eval_data:
             print("Everything OK. Testing...")
-        image, label = input.single_input(file_name, real_label)
+
+        display_image = plt.imread(file_name)
+        image = input.single_input(file_name)
+
         logits = model.inference(image)[0]
         predicted_class = tf.argmax(logits, axis=0)
         with tf.Session() as sess:
@@ -41,16 +38,16 @@ def evaluate(file_name, real_label):
                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
 
             evaluation = sess.run(predicted_class)
-            print(sess.run(logits))
-            real_class = "cat" if real_label == 0 else "dog"
             prediction = "cat" if evaluation == 0 else "dog"
-            print("Real class: {}".format(real_class))
-            print("Predicted class: {}".format(prediction))
+            photo_label = "Predicted class: {}".format(prediction)
+            plt.imshow(display_image)
+            plt.suptitle(photo_label)
+            plt.show()
+
 
 def main(argv=None):
-    filename=argv[1]
-    label=int(argv[2])
-    evaluate(filename, label)
+    filename = argv[1]
+    evaluate(filename)
 
 
 if __name__ == '__main__':
